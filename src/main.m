@@ -44,7 +44,7 @@ dt   = 1e-6;
 
 
 % prepare for plotting
-TX = {'Interpreter','Latex'}; FS = {'FontSize',18};
+TX = {'Interpreter','Latex'}; FS = {'FontSize',14};
 TL = {'TickLabelInterpreter','Latex'}; TS = {'FontSize',10};
 UN = {'Units','Centimeters'};
 
@@ -57,26 +57,26 @@ axl = 1.75; axr = 0.90; %   Right and left; spacing of axis to page
 % prepare and plot figure for mechanical solution fields
 fh1 = figure(1); 
 % clf; colormap(ocean);
-fh = axb + 2*axh + 1*avs + axt;
+fh = axb + 1*axh + 0*avs + axt;
 fw = axl + 3*axw + 2*ahs + axr;
 set(fh1,UN{:},'Position',[3 3 fw fh]);
 set(fh1,'PaperUnits','Centimeters','PaperPosition',[0 0 fw fh],'PaperSize',[fw fh]);
 set(fh1,'Color','w','InvertHardcopy','off');
 set(fh1,'Resize','off');
-ax(1) = axes(UN{:},'position',[axl+0*axw+0*ahs axb+1*axh+1*avs axw axh]);
-ax(2) = axes(UN{:},'position',[axl+1*axw+1*ahs axb+1*axh+1*avs axw axh]);
-ax(3) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+1*axh+1*avs axw axh]);
+ax(1) = axes(UN{:},'position',[axl+0*axw+0*ahs axb+0*axh+0*avs axw axh]);
+ax(2) = axes(UN{:},'position',[axl+1*axw+1*ahs axb+0*axh+0*avs axw axh]);
+ax(3) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+0*axh+0*avs axw axh]);
 
 set(fh1, 'CurrentAxes', ax(1))
 imagesc(x,z,f); axis equal tight; box on; cb = colorbar;
-set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Initial Porosity [vol]')
+set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Initial Porosity [vol]',TX{:},FS{:})
 set(fh1, 'CurrentAxes', ax(2))
 imagesc(x,z,T); axis equal tight;  box on; cb = colorbar;
-set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:});title('Initial Temperature [C]')
+set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:});title('Initial Temperature [C]',TX{:},FS{:})
 %text(0,0.9,['time ',num2str(time,4)],TX{:},FS{:},'HorizontalAlignment','center','VerticalAlignment','middle')
 set(fh1, 'CurrentAxes', ax(3))
 imagesc(x,z,C); axis equal tight;  box on; cb = colorbar;
-set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:});title('Initial Concentration')
+set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:});title('Initial Concentration',TX{:},FS{:})
 % text(0,0.9,['time ',num2str(time,4)],TX{:},FS{:},'HorizontalAlignment','center','VerticalAlignment','middle')
 drawnow
 
@@ -206,9 +206,9 @@ while time <= tend
     % plot solution
     if ~mod(m,nop)
         if lvplt
-            fh2 = figure(2);
+            fh2 = figure(2); clf;
         else
-            fh2=figure('Visible','off');
+            fh2=figure('Visible','off'); clf;
         end
                
 %             sgtitle(sprintf('Time elapsed %.1f years', time/31557600))
@@ -234,9 +234,8 @@ while time <= tend
         
         axh = 6.00; axw = 7.50; %   Height and width of axis
         ahs = 1.50; avs = 1.00; %   Horzontal and vertial distance between axis
-        axb = 1.75; axt = 2.90; %   Bottom and top;Size of page relative to axis
+        axb = 1.75; axt = 2.00; %   Bottom and top;Size of page relative to axis
         axl = 1.75; axr = 0.90; %   Right and left; spacing of axis to page
-        
         
         fh = axb + 2*axh + 1*avs + axt;
         fw = axl + 3*axw + 2*ahs + axr;
@@ -251,38 +250,35 @@ while time <= tend
         ax(5) = axes(UN{:},'position',[axl+1*axw+1*ahs axb+0*axh+0*avs axw axh]);
         ax(6) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+0*axh+0*avs axw axh]);
 
-        sgtitle(sprintf('Time elapsed %.1f years', time/31557600))
+        sgtitle(sprintf('Time elapsed %.1f years', time/31557600),TX{:},FS{:})
         text(0,0.9,['time ',num2str(time,4)],TX{:},FS{:},'HorizontalAlignment','center','VerticalAlignment','middle')
          
-               
         set(fh2, 'CurrentAxes', ax(1))
         imagesc(x,z,-w.*3600*24*365.25); axis equal tight; box on; cb = colorbar;
-        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Segregation z-speed [m/yr]')
+        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Segregation z-speed [m/yr]',TX{:},FS{:})
         
         set(fh2, 'CurrentAxes', ax(2))
         imagesc(x,z,u.*3600*24*365.25); axis equal tight;  box on; cb = colorbar;
-        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:});title('Segregation x-speed [m/yr]')
+        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Segregation x-speed [m/yr]',TX{:},FS{:})
         
         set(fh2, 'CurrentAxes', ax(3))
         imagesc(x,z,p); axis equal tight;  box on; cb = colorbar;
-        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:});title('Dynamic fluid pressure [Pa]')
-        text(0,0.9,['time ',num2str(time,4)],TX{:},FS{:},'HorizontalAlignment','center','VerticalAlignment','middle')
+        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Dynamic fluid pressure [Pa]',TX{:},FS{:})
+%         text(0,0.9,['time ',num2str(time,4)],TX{:},FS{:},'HorizontalAlignment','center','VerticalAlignment','middle')
         
         set(fh2, 'CurrentAxes', ax(4))
         imagesc(x,z,T); axis equal tight; box on; cb = colorbar;
-        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Temperature [C]')
+        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Temperature [C]',TX{:},FS{:})
         
         set(fh2, 'CurrentAxes', ax(5))
         imagesc(x,z,C); axis equal tight;  box on; cb = colorbar;
-        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:});title('Concentration [wt]')
+        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Concentration [wt]',TX{:},FS{:})
         
         set(fh2, 'CurrentAxes', ax(6))
         imagesc(x,z,f); axis equal tight;  box on; cb = colorbar;
-        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:});title('Porosity')
+        set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Porosity',TX{:},FS{:})
         drawnow      
-            
-        
-        
+                    
         
         
         % print figure to file
