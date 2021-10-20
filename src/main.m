@@ -6,6 +6,8 @@ x = linspace(-h/2,D+h/2,N+2);
 z = linspace(-h/2,D+h/2,N+2);
 [X,Z] = meshgrid(x,z);
 
+
+
 % initialise smooth random noise
 rng(5);
 rn = rand(N+2,N+2) - 0.5;
@@ -37,7 +39,8 @@ switch Cinit  % initial concentration
     case 'layer'
         C = C0 + (C1-C0) .* (1+erf(25*(Z/D-zlay)))/2 + dC.*rn;
 end
-
+f(abs(Z-D/1.5) <= 25/2)= f_layer;   %Create layer in porosity
+f(abs(X-D/3.0) <= 50/2)= f_layer1;  %Create layer in porosity
 DTDt = 0.*T(2:end-1,2:end-1);
 DCDt = 0.*C(2:end-1,2:end-1);
 dt   = 1e-6;
