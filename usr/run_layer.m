@@ -1,11 +1,11 @@
 clear; close all; clc;
-
-
+    
+%addpath(genpath('/home/gary/Documents/Simulations/'))
 %% SET MODEL PARAMETERS
 
-runID = 'layer';  % run identifier tag
+runID = 'linear_19Oct';  % run identifier tag
 nop   = 50;       % print output every 'nop' steps
-lvplt = 1;        % plot figures live (1) or in background (0)     
+lvplt = 0;        % plot figures live (1) or in background (0)     
 svfig = 1;        % save figures to file (1)
 
 % set domain parameters
@@ -23,21 +23,24 @@ grav  = 9.81;     % gravity [m/s2]
 kC    = 1e-8;     % chemical diffusivity [m2/s]  
 kT    = 1e-6;     % thermal diffusivity [m2/s]
 aT    = 2e-4;     % thermal expansivity [1/K]
-gC    = 2;        % chemical density contrast [1/wt]
+gC    = 1;        % chemical density contrast [1/wt]
 
 % set initial condition parameters
-finit = 'linear'; % initial condition: 'linear' or 'layer'
-f0    = 0.1;      % background porosity [vol]
+finit = 'layer'; % initial condition: 'linear' or 'layer'
+f0    = 10.0;      % background porosity [vol]
 f1    = 0.1;      % base porosity [vol]  
 df    = 0.001;    % perturbation amplitude [vol]
-Tinit = 'layer';  % initial condition: 'linear' or 'layer'
-T0    = 50;       % top temperature [C]
-T1    = 100;      % base temperature [C]
+f_layer = 20.0;
+f_layer1 = 20.0;
+
+Tinit = 'linear';  % initial condition: 'linear' or 'layer'
+T0    = 20;       % top temperature [C]
+T1    = 60;      % base temperature [C]
 dT    = 0.1;      % perturbation amplitude [C]
 Cinit = 'layer';  % initial condition: 'linear' or 'layer'
-C0    = 0.005;    % top concentration  [C]
-C1    = 0.01;     % base concentration [C]
-dC    = 0.0;      % perturbation amplitude [C]
+C0    = 0.5;    % top concentration  [C]
+C1    = 0.1;     % base concentration [C]
+dC    = 0.1;      % perturbation amplitude [C]
 zlay  = 0.5;      % relative depth of layer boundary
 smth  = (N/30)^2; % smoothness of random noise
 
