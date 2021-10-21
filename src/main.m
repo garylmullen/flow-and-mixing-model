@@ -43,7 +43,7 @@ end
 %% Porosity; Layers and Faults
 %f(abs(Z-D/1.5) <= 25/2)= f_layer;   %Create layer in porosity
 % f(abs(X-D/3.0) <= 50/2)= f_layer1;  %Create layer in porosity
-% ind = 0;
+
 ind = Z >= FaultDepth & abs(X-FaultPos) + tand(FaultAngle)*(D-Z)...
     -0.5*(D-FaultDepth) <= 0.5*FaultWidth/cosd(FaultAngle);
 f(ind) = f_Fault;
