@@ -32,6 +32,11 @@ f1    = 0.1;      % base porosity [vol]
 df    = 0.001;    % perturbation amplitude [vol]
 f_layer = 20.0;
 f_layer1 = 20.0;
+f_Fault = 20.0;
+FaultDepth = 600;
+FaultPos = 500;
+FaultAngle = 30;
+FaultWidth = 100.0;
 
 Tinit = 'linear';  % initial condition: 'linear' or 'layer'
 T0    = 20;       % top temperature [C]
