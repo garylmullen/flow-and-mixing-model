@@ -5,7 +5,7 @@ clear; close all; clc;
 
 runID = 'linear_19Oct';  % run identifier tag
 nop   = 50;       % print output every 'nop' steps
-lvplt = 0;        % plot figures live (1) or in background (0)     
+lvplt = 1;        % plot figures live (1) or in background (0)     
 svfig = 1;        % save figures to file (1)
 
 % set domain parameters
@@ -26,17 +26,18 @@ aT    = 2e-4;     % thermal expansivity [1/K]
 gC    = 1;        % chemical density contrast [1/wt]
 
 % set initial condition parameters
-finit = 'layer'; % initial condition: 'linear' or 'layer'
-f0    = 10.0;      % background porosity [vol]
-f1    = 0.1;      % base porosity [vol]  
-df    = 0.001;    % perturbation amplitude [vol]
-f_layer = 20.0;
-f_layer1 = 20.0;
-f_Fault = 20.0;
-FaultDepth = 600;
-FaultPos = 500;
+finit      = 'layer'; % initial condition: 'linear' or 'layer'
+f0         = 0.05;      % background porosity [vol]
+f1         = 0.01;      % base porosity [vol]  
+df         = 0.01;    % perturbation amplitude [vol]
+f_Layer    = 0.1;
+LayerDepth = 500;
+LayerWidth = 100;
+f_Fault    = 0.1;
+FaultDepth = 400;
+FaultPos   = 500;
 FaultAngle = 30;
-FaultWidth = 100.0;
+FaultWidth = 50;
 
 Tinit = 'linear';  % initial condition: 'linear' or 'layer'
 T0    = 20;       % top temperature [C]
@@ -54,7 +55,7 @@ tend  = 1e11;     % model stopping time [s]
 
 % set numerical solver parameters
 CFL   = 0.25;     % Courant number to limit time step size
-tol   = 1e-8;     % residual tolerance for iterative solver
+tol   = 1e-5;     % residual tolerance for iterative solver
 alpha = 0.99;     % step size for iterative solver
 beta  = 0.95;     % damping parameter for iterative solver
 

@@ -39,16 +39,22 @@ switch Cinit  % initial concentration
 end
 
 % Set Layer and Fault porosity
-%f(abs(Z-D/1.5) <= 25/2)= f_layer;   %Create layer in porosity
-% ind = Z >= FaultDepth & abs((X-FaultPos)+ tand(FaultAngle)*(D-Z)...
-%     -0.5*(D-FaultDepth)) <= (0.5*FaultWidth/cosd(FaultAngle)); 
-%  f(ind) = f_Fault;
+f(abs(Z-LayerDepth) <= LayerWidth/2)= f_Layer;   % Create layer in porosity
+ind = Z >= FaultDepth & abs((X-FaultPos)+ tand(FaultAngle)*(D-Z)...
+    -0.5*(D-FaultDepth)) <= (0.5*FaultWidth/cosd(FaultAngle)); 
+f(ind) = f_Fault;
+
+for i=1:10
+    f(2:end-1,2:end-1) = f(2:end-1,2:end-1) ...
+                       + diff(f(:,2:end-1),2,1)./8 ...
+                       + diff(f(2:end-1,:),2,2)./8;
+    f([1 end],:) = f([2 end-1],:);
+    f(:,[1 end]) = f(:,[2 end-1]);
+end
 
 DTDt = 0.*T(2:end-1,2:end-1);
 DCDt = 0.*C(2:end-1,2:end-1);
 dt   = 1e-6;
-
- 
 
 
 % prepare for plotting
@@ -129,7 +135,7 @@ while time <= tend
     while Fnorm >= tol || it < 100 
         
         % store previous iterative solution guesses
-         pii = pi; pi = p;
+        pii = pi; pi = p;
         
         % calculate pressure gradient [Pa/m]
         gradPz = diff(p,1,1)./h;  % vertical gradient
