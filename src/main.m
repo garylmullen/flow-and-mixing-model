@@ -6,8 +6,6 @@ x = linspace(-h/2,D+h/2,N+2);
 z = linspace(-h/2,D+h/2,N+2);
 [X,Z] = meshgrid(x,z);
 
-
-
 % initialise smooth random noise
 rng(5);
 rn = rand(N+2,N+2) - 0.5;
@@ -25,7 +23,7 @@ switch finit  % initial porosity
     case 'linear'
         f = f0 + (f1-f0) .* Z/D + df.*rn;
     case 'layer'
-        f = f0 + (f1-f0) .* (1+erf(25*(Z/D-zlay)))/2 + df.*rn;
+        f = f0 + (f1-f0) .* (1+erf(25*(Z/D-zlay)))/2 +   df.*rn;
 end
 switch Tinit  % initial temperature
     case 'linear'
@@ -40,22 +38,17 @@ switch Cinit  % initial concentration
         C = C0 + (C1-C0) .* (1+erf(25*(Z/D-zlay)))/2 + dC.*rn;
 end
 
-%% Porosity; Layers and Faults
+% Set Layer and Fault porosity
 %f(abs(Z-D/1.5) <= 25/2)= f_layer;   %Create layer in porosity
-% f(abs(X-D/3.0) <= 50/2)= f_layer1;  %Create layer in porosity
-
-ind = Z >= FaultDepth & abs(X-FaultPos) + tand(FaultAngle)*(D-Z)...
-    -0.5*(D-FaultDepth) <= 0.5*FaultWidth/cosd(FaultAngle);
-f(ind) = f_Fault;
-
-
-
-%%
-
+% ind = Z >= FaultDepth & abs((X-FaultPos)+ tand(FaultAngle)*(D-Z)...
+%     -0.5*(D-FaultDepth)) <= (0.5*FaultWidth/cosd(FaultAngle)); 
+%  f(ind) = f_Fault;
 
 DTDt = 0.*T(2:end-1,2:end-1);
 DCDt = 0.*C(2:end-1,2:end-1);
 dt   = 1e-6;
+
+ 
 
 
 % prepare for plotting
@@ -94,7 +87,6 @@ imagesc(x,z,C); axis equal tight;  box on; cb = colorbar;
 set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:});title('Initial Concentration',TX{:},FS{:})
 % text(0,0.9,['time ',num2str(time,4)],TX{:},FS{:},'HorizontalAlignment','center','VerticalAlignment','middle')
 drawnow
-
 
 % prepare solution & residual arrays for VP solver
 w = zeros(N+1,N+2);  % vertical Darcy speed
@@ -137,7 +129,7 @@ while time <= tend
     while Fnorm >= tol || it < 100 
         
         % store previous iterative solution guesses
-        pii = pi; pi = p;
+         pii = pi; pi = p;
         
         % calculate pressure gradient [Pa/m]
         gradPz = diff(p,1,1)./h;  % vertical gradient
@@ -225,28 +217,7 @@ while time <= tend
         else
             fh2=figure('Visible','off'); clf;
         end
-               
-%             sgtitle(sprintf('Time elapsed %.1f years', time/31557600))
-%         subplot(2,3,1);
-%         imagesc(x,z,-w.*3600*24*365.25); axis equal tight; colorbar;
-%         title(['Segregation','z-speed [m/yr]'])
-%         subplot(2,3,2);
-%         imagesc(x,z,u.*3600*24*365.25); axis equal tight; colorbar;
-%         title(['Segregation','x-speed [m/yr]'])
-%         subplot(2,3,3);
-%         imagesc(x,z,p); axis equal tight; colorbar;
-%         title(['Dynamic fluid','pressure [Pa]'])
-%         subplot(2,3,4);
-%         imagesc(x,z,T); axis equal tight; colorbar;
-%         title('Temperature [C]')
-%         subplot(2,3,5);
-%         imagesc(x,z,C); axis equal tight; colorbar;
-%         title('Concentration [wt]')
-%         subplot(2,3,6);
-%         imagesc(x,z,f); axis equal tight; colorbar;
-%         title('Porosity [vol]')
-%         drawnow % draw figure now (avoids Matlab deciding to delay)
-        
+                     
         axh = 6.00; axw = 7.50; %   Height and width of axis
         ahs = 1.50; avs = 1.00; %   Horzontal and vertial distance between axis
         axb = 1.75; axt = 2.00; %   Bottom and top;Size of page relative to axis
