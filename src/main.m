@@ -24,6 +24,12 @@ switch finit  % initial porosity
         f = f0 + (f1-f0) .* Z/D + df.*rn;
     case 'layer'
         f = f0 + (f1-f0) .* (1+erf(25*(Z/D-zlay)))/2 +   df.*rn;
+        
+        % 'Stacked Error function to make multiple layer'
+%         fa = f0 + (f1-f0) .* (1+erf(50*(Z/D-0.2)))/2 + df.*rn;
+%         fb = f2 + (f3-f2) .* (1+erf(50*(Z/D-0.6)))/2 + df.*rn;
+%         f = fa+fb; 
+        
 end
 switch Tinit  % initial temperature
     case 'linear'
@@ -34,16 +40,29 @@ end
 switch Cinit  % initial concentration
     case 'linear'
         C = C0 + (C1-C0) .* Z/D + dC.*rn;
+        %C = C1 + (C0-C1) .* X/D + dC.*rn; Horizontal gradient from LHS
     case 'layer'
         C = C0 + (C1-C0) .* (1+erf(25*(Z/D-zlay)))/2 + dC.*rn;
 end
 
-% Set Layer and Fault porosity
-f(abs(Z-LayerDepth) <= LayerWidth/2)= f_Layer;   % Create layer in porosity
-ind = Z >= FaultDepth & abs((X-FaultPos)+ tand(FaultAngle)*(D-Z)...
-    -0.5*(D-FaultDepth)) <= (0.5*FaultWidth/cosd(FaultAngle)); 
-f(ind) = f_Fault;
 
+% Set Layer porosity
+%f(abs(Z-LayerDepth) <= LayerWidth/2)= f_Layer;   % layer
+
+% Set fault1 porosity
+ind1 = Z >= FaultDepth1 & abs((X-FaultPos1)+ tand(FaultAngle1)*(D-Z)...
+    -0.5*(D-FaultDepth1)) <= (0.5*FaultWidth1/cosd(FaultAngle1)); % Fault
+f(ind1) = f_Fault1;
+
+% Set fault2 porosity
+ind2 = Z >= FaultDepth2 & abs((X-FaultPos2)+ tand(FaultAngle2)*(D-Z)...
+    -0.5*(D-FaultDepth2)) <= (0.5*FaultWidth2/cosd(FaultAngle2)); % Fault
+f(ind2) = f_Fault2;
+
+% Set fault concentration
+%C(ind1)= C_Fault;
+
+%Smoothing function applied to porosity to minimise sharp interfaces
 for i=1:10
     f(2:end-1,2:end-1) = f(2:end-1,2:end-1) ...
                        + diff(f(:,2:end-1),2,1)./8 ...
@@ -243,7 +262,7 @@ while time <= tend
         ax(6) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+0*axh+0*avs axw axh]);
 
         sgtitle(sprintf('Time elapsed %.1f years', time/31557600),TX{:},FS{:})
-        text(0,0.9,['time ',num2str(time,4)],TX{:},FS{:},'HorizontalAlignment','center','VerticalAlignment','middle')
+        %text(0,0.9,['time ',num2str(time,4)],TX{:},FS{:},'HorizontalAlignment','center','VerticalAlignment','middle')
          
         set(fh2, 'CurrentAxes', ax(1))
         imagesc(x,z,-w.*3600*24*365.25); axis equal tight; box on; cb = colorbar;
@@ -257,7 +276,7 @@ while time <= tend
         imagesc(x,z,p); axis equal tight;  box on; cb = colorbar;
         set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Dynamic fluid pressure [Pa]',TX{:},FS{:})
 %         text(0,0.9,['time ',num2str(time,4)],TX{:},FS{:},'HorizontalAlignment','center','VerticalAlignment','middle')
-        
+      
         set(fh2, 'CurrentAxes', ax(4))
         imagesc(x,z,T); axis equal tight; box on; cb = colorbar;
         set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Temperature [C]',TX{:},FS{:})

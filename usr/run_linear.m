@@ -4,7 +4,7 @@ clear; close all; clc;
 %% SET MODEL PARAMETERS
 
 runID = 'linear'; % run identifier tag
-nop   = 10;       % print output every 'nop' steps
+nop   = 50;       % print output every 'nop' steps
 lvplt = 1;        % plot figures live (1) or in background (0)     
 svfig = 1;        % save figures to file (1)
 
@@ -23,18 +23,33 @@ grav  = 9.81;     % gravity [m/s2]
 kC    = 1e-8;     % chemical diffusivity [m2/s]  
 kT    = 1e-6;     % thermal diffusivity [m2/s]
 aT    = 2e-4;     % thermal expansivity [1/K]
-gC    = 2;        % chemical density contrast [1/wt]
+gC    = 1;        % chemical density contrast [1/wt]
 
 % set initial condition parameters
 finit = 'linear'; % initial condition: 'linear' or 'layer'
 f0    = 0.1;      % background porosity [vol]
 f1    = 0.1;      % base porosity [vol]  
 df    = 0.001;    % perturbation amplitude [vol]
+f_Layer = 0.1;    % layer porosity  
+LayerDepth = 700; % depth of layer
+LayerWidth = 100; % Width of layer
+f_Fault1 = 0.5;    % fault porosity 
+FaultDepth1 = 0; % fault depth
+FaultPos1 = -100;   % fault tip position on x axis
+FaultAngle1 = 10;  % Angle of fault
+FaultWidth1 = 20;  % Width of fault
+f_Fault2 = 0.5;    % fault porosity 
+FaultDepth2 = 0; % fault depth
+FaultPos2 = 300;   % fault tip position on x axis
+FaultAngle2 = 10;  % Angle of fault
+FaultWidth2 = 20;  % Width of fault
+
+
 Tinit = 'linear'; % initial condition: 'linear' or 'layer'
 T0    = 50;       % top temperature [C]
 T1    = 100;      % base temperature [C]
 dT    = 0.1;      % perturbation amplitude [C]
-Cinit = 'layer';  % initial condition: 'linear' or 'layer'
+Cinit = 'linear';  % initial condition: 'linear' or 'layer'
 C0    = 0.005;    % top concentration  [C]
 C1    = 0.01;     % base concentration [C]
 dC    = 0.0;      % perturbation amplitude [C]

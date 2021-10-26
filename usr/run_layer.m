@@ -5,7 +5,7 @@ clear; close all; clc;
 
 runID = 'linear_19Oct';  % run identifier tag
 nop   = 50;       % print output every 'nop' steps
-lvplt = 1;        % plot figures live (1) or in background (0)     
+lvplt = 0;        % plot figures live (1) or in background (0)     
 svfig = 1;        % save figures to file (1)
 
 % set domain parameters
