@@ -3,13 +3,13 @@ clear; close all; clc;
 %addpath(genpath('/home/gary/Documents/Simulations/'))
 %% SET MODEL PARAMETERS
 
-runID = 'linear_19Oct';  % run identifier tag
-nop   = 50;       % print output every 'nop' steps
-lvplt = 0;        % plot figures live (1) or in background (0)     
+runID = 'demo';  % run identifier tag
+nop   = 10;       % print output every 'nop' steps
+lvplt = 1;        % plot figures live (1) or in background (0)     
 svfig = 1;        % save figures to file (1)
 
 % set domain parameters
-N     = 200;      % num. grid size
+N     = 300;      % num. grid size
 D     = 1e3;      % phys. domain depth [m]
 
 % set physical parameters
@@ -26,36 +26,38 @@ aT    = 2e-4;     % thermal expansivity [1/K]
 gC    = 1;        % chemical density contrast [1/wt]
 
 % set initial condition parameters
-finit      = 'layer'; % initial condition: 'linear' or 'layer'
-f0         = 0.05;      % background porosity [vol]
-f1         = 0.01;      % base porosity [vol]  
+finit      = 'linear'; % initial condition: 'linear' or 'layer'
+f0         = 0.05;    % background porosity [vol]
+f1         = 0.01;    % base porosity [vol]  
 df         = 0.01;    % perturbation amplitude [vol]
-f_Layer    = 0.1;
-LayerDepth = 500;
-LayerWidth = 100;
-f_Fault    = 0.1;
-FaultDepth = 400;
-FaultPos   = 500;
-FaultAngle = 30;
-FaultWidth = 50;
 
 Tinit = 'linear';  % initial condition: 'linear' or 'layer'
-T0    = 20;       % top temperature [C]
-T1    = 60;      % base temperature [C]
-dT    = 0.1;      % perturbation amplitude [C]
-Cinit = 'layer';  % initial condition: 'linear' or 'layer'
-C0    = 0.5;    % top concentration  [C]
-C1    = 0.1;     % base concentration [C]
-dC    = 0.1;      % perturbation amplitude [C]
-zlay  = 0.5;      % relative depth of layer boundary
-smth  = (N/30)^2; % smoothness of random noise
+T0    = 20;        % top temperature [C]
+T1    = 100;       % base temperature [C]
+dT    = 0.1;       % perturbation amplitude [C]
+Cinit = 'linear';  % initial condition: 'linear' or 'layer'
+C0    = 0.001;     % top concentration  [C]
+C1    = 0.001;     % base concentration [C]
+dC    = 0.0;       % perturbation amplitude [C]
+zlay  = 0.5;       % relative depth of layer boundary
+wlay  = 0.02;      % relative width of layer boundary
+xstruct = [D/2,D/2];  % position of structures
+zstruct = [400,400];  % onset depth of structures
+dstruct = [D,500];  % final depth of structures
+wstruct = [D/20,D/5]; % thickness of structures
+astruct = [30,90];    % angle of structures to vertical
+fstruct = [0.1,0.1];  % porosity of structures (nan = do not set)
+Tstruct = [nan,nan];  % temperature of structures (nan = do not set)
+Cstruct = [nan,0.05]; % salinity of structures (nan = do not set)
+smth    = (N/40)^2;  % smoothness of initial fields
 
 % set model timing parameters
 tend  = 1e11;     % model stopping time [s]
 
 % set numerical solver parameters
 CFL   = 0.25;     % Courant number to limit time step size
-tol   = 1e-5;     % residual tolerance for iterative solver
+tol   = 1e-7;     % residual tolerance for iterative solver
+maxit = 5e3;      % maximum number of iterations
 alpha = 0.99;     % step size for iterative solver
 beta  = 0.95;     % damping parameter for iterative solver
 

@@ -21,62 +21,62 @@ rn = rn./max(abs(rn(:)));
 % set initial condition
 switch finit  % initial porosity
     case 'linear'
-        f = f0 + (f1-f0) .* Z/D + df.*rn;
+        f = f0 + (f1-f0) .* Z/D;
     case 'layer'
-        f = f0 + (f1-f0) .* (1+erf(25*(Z/D-zlay)))/2 +   df.*rn;
-        
-        % 'Stacked Error function to make multiple layer'
-%         fa = f0 + (f1-f0) .* (1+erf(50*(Z/D-0.2)))/2 + df.*rn;
-%         fb = f2 + (f3-f2) .* (1+erf(50*(Z/D-0.6)))/2 + df.*rn;
-%         f = fa+fb; 
-        
+        f = f0 + (f1-f0) .* (1+erf((Z/D-zlay)/wlay))/2;
 end
 switch Tinit  % initial temperature
     case 'linear'
-        T = T0 + (T1-T0) .* Z/D + dT.*rn;
+        T = T0 + (T1-T0) .* Z/D;
     case 'layer'
-        T = T0 + (T1-T0) .* (1+erf(25*(Z/D-zlay)))/2 + dT.*rn;
+        T = T0 + (T1-T0) .* (1+erf((Z/D-zlay)/wlay))/2;
 end
 switch Cinit  % initial concentration
     case 'linear'
-        C = C0 + (C1-C0) .* Z/D + dC.*rn;
-        %C = C1 + (C0-C1) .* X/D + dC.*rn; Horizontal gradient from LHS
+        C = C0 + (C1-C0) .* Z/D;
     case 'layer'
-        C = C0 + (C1-C0) .* (1+erf(25*(Z/D-zlay)))/2 + dC.*rn;
+        C = C0 + (C1-C0) .* (1+erf((Z/D-zlay)/wlay))/2;
 end
 
-
-% Set Layer porosity
-%f(abs(Z-LayerDepth) <= LayerWidth/2)= f_Layer;   % layer
-
-% Set fault1 porosity
-ind1 = Z >= FaultDepth1 & abs((X-FaultPos1)+ tand(FaultAngle1)*(D-Z)...
-    -0.5*(D-FaultDepth1)) <= (0.5*FaultWidth1/cosd(FaultAngle1)); % Fault
-f(ind1) = f_Fault1;
-
-% Set fault2 porosity
-ind2 = Z >= FaultDepth2 & abs((X-FaultPos2)+ tand(FaultAngle2)*(D-Z)...
-    -0.5*(D-FaultDepth2)) <= (0.5*FaultWidth2/cosd(FaultAngle2)); % Fault
-f(ind2) = f_Fault2;
-
-% Set fault concentration
-%C(ind1)= C_Fault;
-
-%Smoothing function applied to porosity to minimise sharp interfaces
-for i=1:10
-    f(2:end-1,2:end-1) = f(2:end-1,2:end-1) ...
-                       + diff(f(:,2:end-1),2,1)./8 ...
-                       + diff(f(2:end-1,:),2,2)./8;
-    f([1 end],:) = f([2 end-1],:);
-    f(:,[1 end]) = f(:,[2 end-1]);
+% add linear structures (faults, aquifers, etc.)
+% get indicator functions
+indstruct = zeros([size(f),length(zstruct)]);
+for i = 1:length(zstruct)
+    indstruct(:,:,i) = Z >= zstruct(i) & Z <= dstruct(i) ...
+        & abs((X-xstruct(i))+ tand(astruct(i))*(D-Z)...
+        - 0.5*(D-zstruct(i))) <= (0.5*wstruct(i)/cosd(astruct(i)));
 end
 
+% Smoothing function applied to structure indicator to minimise sharp interfaces
+for i=1:smth/3
+    indstruct(2:end-1,2:end-1,:) = indstruct(2:end-1,2:end-1,:) ...
+                       + diff(indstruct(:,2:end-1,:),2,1)./8 ...
+                       + diff(indstruct(2:end-1,:,:),2,2)./8;
+    indstruct([1 end],:,:) = indstruct([2 end-1],:,:);
+    indstruct(:,[1 end],:) = indstruct(:,[2 end-1],:);
+end
+
+% update initial condition within structures
+for i = 1:length(zstruct)
+    if ~isnan(fstruct(i)); f = indstruct(:,:,i).*fstruct(i) + (1-indstruct(:,:,i)).*f; end
+    if ~isnan(Tstruct(i)); T = indstruct(:,:,i).*Tstruct(i) + (1-indstruct(:,:,i)).*T; end
+    if ~isnan(Cstruct(i)); C = indstruct(:,:,i).*Cstruct(i) + (1-indstruct(:,:,i)).*C; end
+end
+
+% add smooth random perturbations
+f = f + df.*rn;
+T = T + dT.*rn;
+C = C + dC.*rn;
+
+% initialise timing parameters
 DTDt = 0.*T(2:end-1,2:end-1);
 DCDt = 0.*C(2:end-1,2:end-1);
 dt   = 1e-6;
-
+m    = 0;
+time = 0;
 
 % prepare for plotting
+load ocean
 TX = {'Interpreter','Latex'}; FS = {'FontSize',14};
 TL = {'TickLabelInterpreter','Latex'}; TS = {'FontSize',10};
 UN = {'Units','Centimeters'};
@@ -86,9 +86,8 @@ ahs = 1.50; avs = 1.00; %   Horzontal and vertial distance between axis
 axb = 1.75; axt = 0.90; %   Bottom and top;Size of page relative to axis
 axl = 1.75; axr = 0.90; %   Right and left; spacing of axis to page
 
-
 % prepare and plot figure for mechanical solution fields
-fh1 = figure(1); 
+fh1 = figure(1); clf; colormap(ocean);
 % clf; colormap(ocean);
 fh = axb + 1*axh + 0*avs + axt;
 fw = axl + 3*axw + 2*ahs + axr;
@@ -121,8 +120,7 @@ F = zeros(N+2,N+2);  % residual for pressure equation
 
 
 %% MAIN TIME STEPPING LOOP
-m    = 0;
-time = 0;
+
 while time <= tend
 
     fprintf(1,'\n\n*****  step = %d,  time = %1.3e [s],  step = %1.3e \n\n',m,time,dt);
@@ -151,7 +149,7 @@ while time <= tend
     Fnorm = 1e6;
     pi    = p;
     it    = 0;
-    while Fnorm >= tol || it < 100 
+    while Fnorm >= tol && it < maxit || it < 100 
         
         % store previous iterative solution guesses
         pii = pi; pi = p;
@@ -191,10 +189,21 @@ while time <= tend
             up = max(0, (u(2:end-1,1:end-1)+u(2:end-1,2:end))./2);
             um = min(0, (u(2:end-1,1:end-1)+u(2:end-1,2:end))./2);
             
-            grdTzp = diff(T(2:end  ,2:end-1),1,1)./h;
-            grdTzm = diff(T(1:end-1,2:end-1),1,1)./h;
-            grdTxp = diff(T(2:end-1,2:end  ),1,2)./h;
-            grdTxm = diff(T(2:end-1,1:end-1),1,2)./h;
+            Tgh                    = zeros(size(T)+2);
+            Tgh(2:end-1,2:end-1)   = T;
+            Tgh([1 end],:) = Tgh([2 end-1],:);
+            Tgh(:,[1 end]) = Tgh(:,[2 end-1]);
+            
+            Tcc = Tgh(3:end-2,3:end-2);
+            Tjp = Tgh(4:end-1,3:end-2);  Tjpp = Tgh(5:end-0,3:end-2);
+            Tjm = Tgh(2:end-3,3:end-2);  Tjmm = Tgh(1:end-4,3:end-2);
+            Tip = Tgh(3:end-2,4:end-1);  Tipp = Tgh(3:end-2,5:end-0);
+            Tim = Tgh(3:end-2,2:end-3);  Timm = Tgh(3:end-2,1:end-4);
+            
+            grdTxp = (-3*Tcc+4*Tip-Tipp)/2/h;
+            grdTxm = ( 3*Tcc-4*Tim+Timm)/2/h;
+            grdTzp = (-3*Tcc+4*Tjp-Tjpp)/2/h;
+            grdTzm = ( 3*Tcc-4*Tjm+Tjmm)/2/h;
             
             DTDt = - (wp.*grdTzm + wm.*grdTzp + up.*grdTxm + um.*grdTxp) ...
                  + kT.* (diff(T(:,2:end-1),2,1)./h^2 + diff(T(2:end-1,:),2,2)./h^2);
@@ -211,13 +220,24 @@ while time <= tend
             % UPDATE CONCENTRATION SOLUTION (EXPLICIT SOLVER)
             
             % calculate concentration advection
-            grdCzp = diff(C(2:end  ,2:end-1),1,1)./h;
-            grdCzm = diff(C(1:end-1,2:end-1),1,1)./h;
-            grdCxp = diff(C(2:end-1,2:end  ),1,2)./h;
-            grdCxm = diff(C(2:end-1,1:end-1),1,2)./h;
+            Cgh                    = zeros(size(C)+2);
+            Cgh(2:end-1,2:end-1)   = C;
+            Cgh([1 end],:) = Cgh([2 end-1],:);
+            Cgh(:,[1 end]) = Cgh(:,[2 end-1]);
+            
+            Ccc = Cgh(3:end-2,3:end-2);
+            Cjp = Cgh(4:end-1,3:end-2);  Cjpp = Cgh(5:end-0,3:end-2);
+            Cjm = Cgh(2:end-3,3:end-2);  Cjmm = Cgh(1:end-4,3:end-2);
+            Cip = Cgh(3:end-2,4:end-1);  Cipp = Cgh(3:end-2,5:end-0);
+            Cim = Cgh(3:end-2,2:end-3);  Cimm = Cgh(3:end-2,1:end-4);
+            
+            grdCxp = (-3*Ccc+4*Cip-Cipp)/2/h;
+            grdCxm = ( 3*Ccc-4*Cim+Cimm)/2/h;
+            grdCzp = (-3*Ccc+4*Cjp-Cjpp)/2/h;
+            grdCzm = ( 3*Ccc-4*Cjm+Cjmm)/2/h;
             
             DCDt = - (wp.*grdCzm + wm.*grdCzp + up.*grdCxm + um.*grdCxp) ...
-                + kC.* (diff(C(:,2:end-1),2,1)./h^2 + diff(C(2:end-1,:),2,2)./h^2);
+                 + kC.* (diff(C(:,2:end-1),2,1)./h^2 + diff(C(2:end-1,:),2,2)./h^2);
             
             C(2:end-1,2:end-1) = Co(2:end-1,2:end-1) + (DCDt + DCDto)/2 .* dt;
             
@@ -238,11 +258,13 @@ while time <= tend
     % plot solution
     if ~mod(m,nop)
         if lvplt
-            fh2 = figure(2); clf;
+            fh2 = figure(2); clf; 
         else
             fh2=figure('Visible','off'); clf;
         end
-                     
+        
+        colormap(ocean);
+         
         axh = 6.00; axw = 7.50; %   Height and width of axis
         ahs = 1.50; avs = 1.00; %   Horzontal and vertial distance between axis
         axb = 1.75; axt = 2.00; %   Bottom and top;Size of page relative to axis
@@ -262,7 +284,6 @@ while time <= tend
         ax(6) = axes(UN{:},'position',[axl+2*axw+2*ahs axb+0*axh+0*avs axw axh]);
 
         sgtitle(sprintf('Time elapsed %.1f years', time/31557600),TX{:},FS{:})
-        %text(0,0.9,['time ',num2str(time,4)],TX{:},FS{:},'HorizontalAlignment','center','VerticalAlignment','middle')
          
         set(fh2, 'CurrentAxes', ax(1))
         imagesc(x,z,-w.*3600*24*365.25); axis equal tight; box on; cb = colorbar;
@@ -275,7 +296,6 @@ while time <= tend
         set(fh2, 'CurrentAxes', ax(3))
         imagesc(x,z,p); axis equal tight;  box on; cb = colorbar;
         set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Dynamic fluid pressure [Pa]',TX{:},FS{:})
-%         text(0,0.9,['time ',num2str(time,4)],TX{:},FS{:},'HorizontalAlignment','center','VerticalAlignment','middle')
       
         set(fh2, 'CurrentAxes', ax(4))
         imagesc(x,z,T); axis equal tight; box on; cb = colorbar;
@@ -289,13 +309,12 @@ while time <= tend
         imagesc(x,z,f); axis equal tight;  box on; cb = colorbar;
         set(cb,TL{:},TS{:}); set(gca,TL{:},TS{:}); title('Porosity',TX{:},FS{:})
         drawnow      
-                    
-        
-        
+                            
         % print figure to file
         if svfig
             print(fh2,['../out/',runID,'/',runID,'_',int2str(m/nop)],'-dpng','-r200')
         end
+        clear fh1 fh2
     end
     
     % update time and step count
