@@ -48,7 +48,7 @@ for i = 1:length(zstruct)
 end
 
 % Smoothing function applied to structure indicator to minimise sharp interfaces
-for i=1:smth/3
+for i=1:smth/2
     indstruct(2:end-1,2:end-1,:) = indstruct(2:end-1,2:end-1,:) ...
                        + diff(indstruct(:,2:end-1,:),2,1)./8 ...
                        + diff(indstruct(2:end-1,:,:),2,2)./8;
@@ -210,6 +210,8 @@ while time <= tend
             
             T(2:end-1,2:end-1) = To(2:end-1,2:end-1) + (DTDt + DTDto)/2 .* dt;
             
+            T = max(min([T0,T1,Tstruct]),min(max([T0,T1,Tstruct]),T));  % saveguard min/max bounds
+            
             % apply temperature boundary conditions
             T(:,1  ) = T(:,2    );  % left boundary: insulating
             T(:,end) = T(:,end-1);  % right boundary: insulating
@@ -241,6 +243,8 @@ while time <= tend
             
             C(2:end-1,2:end-1) = Co(2:end-1,2:end-1) + (DCDt + DCDto)/2 .* dt;
             
+            C = max(min([C0,C1,Cstruct]),min(max([C0,C1,Cstruct]),C));  % saveguard min/max bounds
+
             % apply concentration boundary conditions
             C(:,1  ) = C(:,2    );  % left boundary: closed
             C(:,end) = C(:,end-1);  % right boundary: closed
